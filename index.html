@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#090909" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="description" content="Free background swap editor for e-bike, motorcycle and product photos. Remove or replace backgrounds in your browser with no watermark and no login." />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta name="application-name" content="AMP Studio" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="AMP Studio — Free Bike Background Swap" />
+  <meta property="og:description" content="Cut out your bike, swap the background and export high-resolution photos. Free, private and browser-based." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <title>AMP Studio — Free Bike Background Swap</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div><div class="brand">AMP <b>STUDIO</b></div><div class="privacy">Your photos stay on your device.</div></div>
+    <div class="top-actions"><button class="icon-btn" id="undoBtn" title="Undo" aria-label="Undo">↶</button><button class="icon-btn" id="redoBtn" title="Redo" aria-label="Redo">↷</button></div>
+  </header>
+
+  <main class="main">
+    <section class="hero">
+      <div class="hero-kicker">AMP Studio</div>
+      <h1>Change the scene.<br><span>Keep your bike perfect.</span></h1>
+      <p>One-tap bike cutout, background swap and high-resolution export — built for e-bikes, motorcycles and parts. Processing stays on your device.</p>
+      <div class="hero-proof"><span>Free to use</span><span>No watermark</span><span>No login</span><span>Private on-device editing</span></div>
+    </section>
+
+    <section id="uploadCard" class="card upload-card">
+      <div class="drop" id="dropZone">
+        <div class="upload-mark">＋</div>
+        <h2>Upload a bike photo</h2>
+        <p>We’ll automatically isolate the bike, then you can choose a new scene and fine-tune the result.</p>
+        <label class="btn primary file-btn">Choose photo<input id="imageInput" type="file" accept="image/jpeg,image/png,image/webp" /></label>
+        <div class="quick-flow"><div><b>1 · Cut out</b><span>Automatic on-device subject detection.</span></div><div><b>2 · Swap</b><span>Pick a scene or upload your own background.</span></div><div><b>3 · Export</b><span>PNG/JPEG at high resolution with no watermark.</span></div></div>
+      </div>
+    </section>
+
+    <section id="editor" class="editor">
+      <div class="workspace">
+        <div class="card preview-card">
+          <div class="preview-toolbar">
+            <div class="left"><button class="pill" id="compareToggle">Before / after</button><button class="pill" id="fitBtn">Fit</button><span class="model-status" id="modelStatus"><i></i><span>AI ready to load</span></span></div>
+            <div class="right"><button class="pill" id="newPhotoBtn">New photo</button></div>
+          </div>
+          <div class="stage-shell" id="stageShell">
+            <div class="stage" id="stage">
+              <canvas id="outputCanvas"></canvas>
+              <canvas id="beforeCanvas"></canvas>
+              <canvas id="overlayCanvas"></canvas>
+              <canvas id="drawCanvas"></canvas>
+              <div class="compare-line" id="compareLine"></div>
+              <div class="stage-badge" id="stageBadge">KEEP BIKE</div>
+            </div>
+            <div class="processing" id="processing"><div class="processing-box"><div class="spinner"></div><strong id="processingText">Processing on your device…</strong><div class="progress"><i id="progressBar"></i></div><div class="privacy" style="margin-top:10px">First AI cutout may download a local model.</div></div></div>
+          </div>
+          <div class="slider-row" style="margin:10px 4px 2px"><label>Compare</label><input id="compareSlider" type="range" min="0" max="100" value="50"><output id="compareOut">50%</output></div>
+        </div>
+
+        <div class="card controls">
+          <div class="section">
+            <div class="step-title"><span class="step-num">1</span>Choose what to do</div>
+            <div class="mode-grid">
+              <button class="mode-card active" data-mode="keep"><strong>Keep bike</strong><small>Cut it out and place it on a new background.</small></button>
+              <button class="mode-card" data-mode="remove"><strong>Remove bike</strong><small>Experimental local fill for simple backgrounds.</small></button>
+            </div>
+            <div class="row" style="margin-top:8px"><button class="btn primary" id="autoCutoutBtn">Re-detect bike</button><button class="btn secondary" id="clearMaskBtn">Reset mask</button></div>
+          </div>
+
+          <div class="section" id="backgroundSection">
+            <div class="step-title"><span class="step-num">2</span>Choose background</div>
+            <div class="preset-strip" id="presetStrip">
+              <button class="preset p-white active" data-preset="white"><span>White studio</span></button>
+              <button class="preset p-dark" data-preset="dark"><span>Dark studio</span></button>
+              <button class="preset p-asphalt" data-preset="asphalt"><span>Asphalt</span></button>
+              <button class="preset p-mountains" data-preset="mountains"><span>Mountains</span></button>
+              <button class="preset p-sunset" data-preset="sunset"><span>Sunset</span></button>
+              <button class="preset p-workshop" data-preset="workshop"><span>Workshop</span></button>
+              <button class="preset p-garage" data-preset="garage"><span>Garage</span></button>
+              <button class="preset p-red" data-preset="red"><span>AMP red</span></button>
+            </div>
+            <div class="row" style="margin-top:8px"><label class="btn secondary file-btn">Upload background<input id="bgInput" type="file" accept="image/jpeg,image/png,image/webp" /></label><button class="btn secondary" id="autoEnhanceBtn">Auto enhance</button></div>
+          </div>
+
+          <div class="section">
+            <div class="step-title"><span class="step-num">3</span>Refine</div>
+            <div class="brush-tools">
+              <button class="brush-btn active" id="eraseBrush">Erase subject edge</button>
+              <button class="brush-btn" id="restoreBrush">Restore subject</button>
+            </div>
+            <div class="slider-row"><label>Brush size</label><input id="brushSize" type="range" min="6" max="140" value="42"><output id="brushOut">42</output></div>
+            <div class="slider-row"><label>Edge soften</label><input id="feather" type="range" min="0" max="12" value="2"><output id="featherOut">2px</output></div>
+            <div class="slider-row" id="shadowRow"><label>Shadow</label><input id="shadow" type="range" min="0" max="100" value="35"><output id="shadowOut">35%</output></div>
+            <div class="slider-row" id="scaleRow"><label>Bike size</label><input id="subjectScale" type="range" min="55" max="145" value="100"><output id="scaleOut">100%</output></div>
+            <div class="slider-row" id="xRow"><label>Horizontal</label><input id="subjectX" type="range" min="0" max="100" value="50"><output id="xOut">50</output></div>
+            <div class="slider-row" id="yRow"><label>Vertical</label><input id="subjectY" type="range" min="0" max="100" value="50"><output id="yOut">50</output></div>
+            <div class="slider-row"><label>Background blur</label><input id="bgBlur" type="range" min="0" max="24" value="0"><output id="bgBlurOut">0px</output></div>
+            <div class="slider-row"><label>Brightness</label><input id="brightness" type="range" min="60" max="140" value="100"><output id="brightnessOut">100%</output></div>
+            <div class="slider-row"><label>Saturation</label><input id="saturation" type="range" min="0" max="170" value="100"><output id="saturationOut">100%</output></div>
+            <div class="slider-row"><label>Clarity</label><input id="clarity" type="range" min="70" max="140" value="100"><output id="clarityOut">100%</output></div>
+            <div id="removeTools" style="display:none">
+              <button class="btn primary" id="localFillBtn" style="width:100%;margin-top:8px">Rebuild masked area locally</button>
+              <div class="notice"><b>Experimental remove mode.</b> It rebuilds from nearby pixels on your device, so it works best on sky, grass, road and other simple areas. It is not cloud generative AI.</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="step-title"><span class="step-num">4</span>Canvas & preview</div>
+            <div class="ratio-grid">
+              <button class="ratio active" data-ratio="original">Original</button><button class="ratio" data-ratio="1:1">1:1</button><button class="ratio" data-ratio="4:5">4:5</button><button class="ratio" data-ratio="9:16">9:16</button>
+            </div>
+            <div class="slider-row"><label>Preview zoom</label><input id="previewZoom" type="range" min="100" max="200" value="100"><output id="previewZoomOut">100%</output></div>
+          </div>
+
+          <div class="section">
+            <div class="step-title"><span class="step-num">5</span>Export</div>
+            <div class="action-stack"><button class="btn primary" id="exportBtn">Export image</button><button class="btn secondary" id="transparentBtn">Transparent PNG</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="bottom-actions" id="bottomActions"><button class="btn secondary" id="bottomTransparent">PNG cutout</button><button class="btn primary" id="bottomExport">Export image</button></div>
+</div>
+
+<div class="export-sheet" id="exportSheet"><div class="sheet"><div class="sheet-handle"></div><h3>Export</h3><p>Rendered locally at the highest practical resolution.</p><div class="export-grid"><button class="btn primary" id="downloadPng">Download PNG</button><button class="btn secondary" id="downloadJpg">Download JPEG</button><button class="btn secondary" id="copyPng">Copy PNG</button><button class="btn secondary" id="downloadTransparent">Transparent PNG</button></div><button class="btn ghost close-sheet" id="closeSheet">Close</button></div></div>
+<div class="toast" id="toast">Done</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
